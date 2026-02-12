@@ -1,0 +1,7 @@
+langchain
+langgraph
+streamlit
+langchain_openai
+dotenv
+authlib
+bcrypt
