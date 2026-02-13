@@ -1,5 +1,6 @@
 import streamlit as st
 from auth import authenticate
+import re
 
 st.set_page_config(page_title="My App")
 
@@ -35,36 +36,59 @@ if st.session_state.step == "choice":
 # STEP 2 — BYOK FLOW
 # =========================================================
 elif st.session_state.step == "byok":
-    st.subheader("🔑 Enter your API key")
 
-    api_key = st.text_input(
-        "OpenAI API Key",
-        type="password",
-        placeholder="sk-..."
-    )
+    st.subheader("Bring Your Own API Key")
 
-    model = st.selectbox(
-        "Model",
-        ["gpt-4o-mini", "gpt-4o", "gpt-4.1"]
-    )
+    with st.form("byok_form"):
+        email = st.text_input(
+            "Email address *",
+            placeholder="you@example.com"
+        )
 
-    temperature = st.slider(
-        "Temperature", 0.0, 1.0, 0.7, 0.1
-    )
+        api_key = st.text_input(
+            "OpenAI API Key *",
+            type="password",
+            placeholder="sk-..."
+        )
 
-    if st.button("Continue to Chat"):
+        model = st.selectbox(
+            "Model",
+            ["gpt-4o-mini", "gpt-4o", "gpt-4.1"]
+        )
+
+        temperature = st.slider(
+            "Temperature", 0.0, 1.0, 0.7, 0.1
+        )
+
+        submitted = st.form_submit_button("Continue to Chat")
+
+    if submitted:
+        # ---- Email validation ----
+        if not email:
+            st.error("Email is required")
+            st.stop()
+
+        pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+        if not re.match(pattern, email):
+            st.error("Please enter a valid email address")
+            st.stop()
+
+        # ---- API key validation ----
         if not api_key:
             st.error("API key is required")
-        else:
-            st.session_state.openai_api_key = api_key
-            st.session_state.model_name = model
-            st.session_state.temperature = temperature
-            st.switch_page("pages/_chatbot_without_api_key.py")
+            st.stop()
+
+        # ---- Save to session ----
+        st.session_state.user_id = email
+        st.session_state.openai_api_key = api_key
+        st.session_state.model_name = model
+        st.session_state.temperature = temperature
+
+        st.switch_page("pages/_chatbot_without_api_key.py")
 
     if st.button("⬅ Back"):
         st.session_state.step = "choice"
         st.rerun()
-
 # =========================================================
 # STEP 3 — LOGIN FLOW
 # =========================================================
