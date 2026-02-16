@@ -83,6 +83,7 @@ elif st.session_state.step == "byok":
         st.session_state.openai_api_key = api_key
         st.session_state.model_name = model
         st.session_state.temperature = temperature
+        st.session_state.login_method = "byok"
 
         st.switch_page("pages/_chatbot_without_api_key.py")
 
@@ -103,6 +104,7 @@ elif st.session_state.step == "login":
         if user_id:
             st.session_state.logged_in = True
             st.session_state.user_id = user_id
+            st.session_state.login_method = "internal"
             st.switch_page("pages/_chatbot.py")
         else:
             st.error("Invalid credentials")
