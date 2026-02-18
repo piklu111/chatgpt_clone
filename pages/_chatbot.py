@@ -4,7 +4,7 @@ import time
 import uuid
 
 from langchain_core.messages import HumanMessage, BaseMessage
-from backend import create_graph
+from backend import create_graph, get_thread_id, delete_thread
 from dotenv import load_dotenv
 import os
 
@@ -35,7 +35,7 @@ if "messages" not in st.session_state:
 
 if "conv_id" not in st.session_state:
     id = str(uuid.uuid4())
-    st.session_state.conv_id = {'conv_lst' : [id],'curr_conv':id}
+    st.session_state.conv_id = {'conv_lst' : [*get_thread_id(st.session_state.user_id), id],'curr_conv':id}
 
 if "model_name" not in st.session_state:
     st.session_state.model_name = "gpt-4o-mini"
@@ -92,24 +92,25 @@ def new_chat():
     st.session_state.messages = []
 
 def delete_thread_memory(thread_id):
-    user_id = st.session_state.user_id
+    delete_thread(thread_id)
+    # user_id = st.session_state.user_id
 
-    # Build the config key format used internally
-    config = {
-        "configurable": {
-            "user_id": user_id,
-            "thread_id": thread_id
-        }
-    }
+    # # Build the config key format used internally
+    # config = {
+    #     "configurable": {
+    #         "user_id": user_id,
+    #         "thread_id": thread_id
+    #     }
+    # }
 
-    # Access internal storage
-    storage = chat_state.checkpointer.storage
+    # # Access internal storage
+    # storage = chat_state.checkpointer.storage
 
-    # Build the exact key
-    key = tuple(sorted(config["configurable"].items()))
+    # # Build the exact key
+    # key = tuple(sorted(config["configurable"].items()))
 
-    if key in storage:
-        del storage[key]
+    # if key in storage:
+    #     del storage[key]
 
 def delete_conversation(thread_id):
     if len(st.session_state.conv_id['conv_lst']) > 1:
